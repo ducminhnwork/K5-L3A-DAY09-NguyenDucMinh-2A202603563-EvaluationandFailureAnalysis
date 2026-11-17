@@ -42,3 +42,15 @@
   - Bốn failure mode (FM-01, 06, 07, 09) chưa có trace lỗi công khai; grader có sẵn nhưng chưa kiểm chứng trên lỗi thật.
   - Chưa đo trên người dùng thật.
 - **Khi nào tăng eval-set version:** khi thêm item từ trace case hoặc đổi nhãn → `eval_set_version: v2` và sinh lại baseline; đổi ngưỡng hoặc thêm metric → tăng `metric_spec_version`. Cùng một version eval set thì ngưỡng chỉ được chặt hơn, không nới.
+
+## Eval set v2 (Advanced, M5-M7)
+
+- Eval set v2 `08901d26eb97`: 28 mục (v1 + gói adversarial), mỗi FM bị tấn công có ≥3 mục; ánh xạ ở `config/fm_map.yaml`.
+- Baseline v2 (fixed, 5 seed): pass_rate 0.9786, pass_hat_5 0.8929, pass_at_5 1.0.
+- A/A (seed 66,77,88,99,110): mọi chỉ số lệch +0.0000 vì MockLLM tất định, nên nhiễu bằng 0 và ngưỡng đặt sát baseline. Với LLM thật phải đo lại nhiễu A/A trước khi đặt ngưỡng.
+- Ngưỡng: `pass_hat_5` min 0.88 (baseline 0.8929 = 25/28 mục luôn đúng, thêm 1 mục hỏng là bị chặn).
+- Slice: `money_movement` min 0.95 (baseline 1.0), `adversarial` min 0.95 (baseline 0.971), `denial` min 0.90 (baseline 0.945).
+- Slice nào bắt lỗi nào: `slice_regression` (sum_parts ở seed lẻ, hỏng E-014/E-105/E-106) pass_rate chung chỉ giảm 0.979→0.936 và CI chứa 0 nên qua cổng chung, nhưng money_movement tụt 1.0→0.85 và adversarial 0.971→0.914 nên bị slice gate chặn. `flaky_regression` (seed%3==0, round_down) bị pass_hat_5 và slice chặn.
+- Mutation scorecard: 3/3 biến thể xấu bị chặn, 0 báo nhầm (fixed, honest_refactor đều merge).
+- Giới hạn cỡ mẫu: lỗi chỉ xuất hiện ở 1/3 số seed trên ít mục (3 mục) chỉ bị bắt nhờ ngưỡng slice tuyệt đối, không nhờ CI; với 5 seed, một lỗi hiếm hơn thế không phát hiện tin cậy.
+- Integrity check (`gate.integrity_check`): chặn NaN/inf, thiếu/trùng dòng, lệch tập (item, seed), grader lỗi, số liệu không khớp dòng, đổi slice tag, nới ngưỡng (ratchet). 4 trap công khai đều bị chặn.
