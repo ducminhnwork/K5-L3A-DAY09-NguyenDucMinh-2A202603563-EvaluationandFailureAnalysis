@@ -1,7 +1,7 @@
 # Eval card — LogiX-VN refund agent
 
 - **Run ID / eval set SHA:** baseline `E-swarm-20261117-35a9`; PR chạy thử `E-fixed-20261117-35a9` và `E-seeded_regression-20261117-35a9`; eval set `35a9cfd79055`
-- **Phiên bản:** code (commit) `__COMMIT__` · eval set v1 (sha `35a9cfd79055`) · metric_spec 1.0 · grader (commit) `__COMMIT__` · seeds 11/22/33/44/55
+- **Phiên bản:** code (commit) `f490b22` · eval set v1 (sha `35a9cfd79055`) · metric_spec 1.0 · grader (commit) `f490b22` · seeds 11/22/33/44/55
 - **Eval set:** v1, 14 item × 5 seed (70 trial mỗi lần chạy), nguồn lab8_public; nhãn: `labels_v1.json`, tách khỏi item, `failure_modes` gắn theo `docs/failure_taxonomy.md`
 - **Metric & ngưỡng** (`config/metric_spec.yaml`):
 
