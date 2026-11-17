@@ -1,30 +1,18 @@
 # Trace case: từ trace tới quyết định sai đầu tiên
 
-Một trace case trả lời một câu: **bước nào là bước sai đầu tiên**, và test nào sẽ bắt được nó lần sau.
-
 ```bash
 cd src
 python -m lab9.trace_case --shape seeded_regression --claim C-002 --seed 11
 python -m lab9.trace_case --shape fixed --claim C-002 --seed 11   # đối chứng
 ```
 
-Lệnh in ra ba phần: các event trong trace (`reply`, `decision`, `model_override`, `error` …), ledger so với nhãn, và lý do của grader Lab 8.
-
-## Mẫu điền (mỗi nhóm 1 case, lấy từ trial đang fail trong report)
-
 | Trường | Nội dung |
 |---|---|
-| Trial | `<shape> <claim>@<seed>`, run ID trong report |
-| Triệu chứng | Grader nào fail; reply nói gì so với ledger ghi gì |
-| Bước sai đầu tiên | Số thứ tự event + kind + trích payload (≤1 dòng) |
-| Vì sao là bước *đầu tiên* | Các bước trước đó đúng ra sao (dẫn số event) |
-| Failure mode | Mã FM-xx trong `docs/failure_taxonomy.md` |
-| Đối chứng | Cùng claim@seed trên shape `fixed`: bước đó khác thế nào |
-| Regression test | Tên test + grader/assert nào bắt được; đã thấy fail trên variant lỗi và pass trên `fixed` chưa |
-| Chưa chắc chắn | Điều trace không chứng minh được |
-
-## Quy tắc
-
-- Đọc **ledger trước reply**: reply trôi chảy vẫn có thể đi kèm một khoản hoàn sai.
-- "Bước sai đầu tiên" phải dẫn số event cụ thể, không phải "agent bị nhầm".
-- Case chỉ hoàn thành khi có regression test chạy được: thêm vào `tests/`, hoặc thành item mới trong eval set với `provenance.from_trace`.
+| Trial | `seeded_regression C-002@11`, run ID `E-seeded_regression-20261117-35a9` (`R-seeded_regression-C-002-s11`) |
+| Triệu chứng | Lab 8 grader FAIL: `status resolved != denied`. Ledger ghi 20.000đ, 1 dòng; nhãn là 0đ, `denied`. Reply "LogiX đã hoàn 20.000đ cho đơn O-202" khớp với ledger nên `reply_matches_ledger` không bắt được ca này. |
+| Bước sai đầu tiên | Event 3 `model_override {"delay_days": 5}`: agent ghi đè số ngày trễ của đơn O-202 bằng số 5 trong ticket, trong khi DB ghi 2 ngày. |
+| Vì sao là bước *đầu tiên* | Event 1 `handoff` và event 2 `investigator` (`lookup_order` thấy đơn, `visible: true`) đều đúng. Từ event 3 trở đi mọi thứ là hệ quả: event 4 `quote` ra 20.000đ theo 5 ngày, event 6 `reply` báo 20.000đ, host ghi ledger 20.000đ. |
+| Failure mode | FM-03 `ticket_trust` (tin ticket hơn DB) |
+| Đối chứng | `fixed` chạy 70/70 trial `pass_rate = 1.0` và `db_fact_kept = 1.0` (không có event `model_override` nào trong cả lần chạy), nên C-002@11 không có bước ghi đè và PASS. |
+| Regression test | `tests/test_lab9_trace_regression.py` (`test_ticket_trust_is_caught`, `test_clean_trial_passes`): dựng lại trial C-002@11; `DbFactKept` và `RefundAmountCorrect` fail trên bản lỗi, pass trên bản đúng. Chạy: `python -m pytest -q -m student -o addopts= -k trace_regression`. Cổng `eval-gate` cũng chặn `seeded_regression` ở `pass_rate` Δ −0.271, CI [−0.500, −0.057]. |
+| Chưa chắc chắn | Trace chỉ cho thấy agent dùng số ngày của ticket, không cho biết vì sao (MockLLM đặt cố định `seed % 5 == 0` hoặc bật cờ `ticket_trust`). Không biết LLM thật có lỗi theo cùng cách hay không. |

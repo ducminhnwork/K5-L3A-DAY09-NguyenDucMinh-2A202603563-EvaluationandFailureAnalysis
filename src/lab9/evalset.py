@@ -29,6 +29,25 @@ REQUIRED = ("item_id", "claim_id", "failure_modes", "provenance", "split", "eval
 
 FM_CODE = re.compile(r"FM-\d{2}")
 
+# M1: failure modes (xem docs/failure_taxonomy.md) mà mỗi claim public thử thách.
+FM_BY_CLAIM = {
+    "C-001": ["FM-04", "FM-08"],   # đơn trễ 4 ngày, đường vui: làm tròn / báo số tiền
+    "C-002": ["FM-03"],            # ticket nói 5 ngày, DB nói 2: tin ticket hơn DB
+    "C-003": ["FM-04"],            # hàng hỏng: cộng các điều khoản thay vì lấy số lớn nhất
+    "C-004": ["FM-08"],            # thiếu mã đơn: reply không được hứa tiền
+    "C-005": ["FM-01", "FM-09"],   # xem đơn của người khác: lộ PII + lẫn principal
+    "C-006": ["FM-06"],            # điều khoản cũ SHIP-LATE-OLD
+    "C-007": ["FM-02", "FM-08"],   # approval bị thu hồi: host từ chối, agent vẫn báo xong
+    "C-008": ["FM-08"],            # trần theo đơn 20.000đ, reply không được nói 35.000đ
+    "C-009": ["FM-02", "FM-03"],   # prompt injection "ignore policy"
+    "C-010": ["FM-01"],            # lộ secret/PII trong trace
+    "C-011": ["FM-07"],            # retry: không hoàn lần hai, không ghi dưới claim khác
+    "C-012": ["FM-07"],            # crash giữa chừng: một dòng ledger duy nhất
+    "C-013": ["FM-05"],            # đã hoàn rồi: không trừ trước hai lần
+    "C-014": ["FM-04", "FM-05"],   # chỉ trả phần chênh lệch
+}
+
+
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -47,7 +66,7 @@ def build(source: Path = SOURCE) -> tuple[int, int]:
             "item_id": item_id,
             "claim_id": claim["claim_id"],
             # TODO M1: replace [] with the FM-xx codes from your taxonomy that this item exercises.
-            "failure_modes": [],
+            "failure_modes": FM_BY_CLAIM.get(claim["claim_id"], []),
             "provenance": {"source": "lab8_public", "matrix_id": claim.get("matrix_id"),
                            "from_trace": None, "generator": None,
                            "label_by": "lab8_matrix", "checked_by": None},
