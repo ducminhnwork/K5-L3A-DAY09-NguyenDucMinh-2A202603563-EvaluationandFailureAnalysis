@@ -8,7 +8,7 @@ python -m lab9.trace_case --shape fixed --claim C-002 --seed 11   # đối chứ
 
 | Trường | Nội dung |
 |---|---|
-| Trial | `seeded_regression C-002@11`, run ID `E-seeded_regression-20261117-35a9` (`R-seeded_regression-C-002-s11`) |
+| Trial | `seeded_regression C-002@11`, run ID `E-seeded_regression-20261117-29c1` (`R-seeded_regression-C-002-s11`) |
 | Triệu chứng | Lab 8 grader FAIL: `status resolved != denied`. Ledger ghi 20.000đ, 1 dòng; nhãn là 0đ, `denied`. Reply "LogiX đã hoàn 20.000đ cho đơn O-202" khớp với ledger nên `reply_matches_ledger` không bắt được ca này. |
 | Bước sai đầu tiên | Event 3 `model_override {"delay_days": 5}`: agent ghi đè số ngày trễ của đơn O-202 bằng số 5 trong ticket, trong khi DB ghi 2 ngày. |
 | Vì sao là bước *đầu tiên* | Event 1 `handoff` và event 2 `investigator` (`lookup_order` thấy đơn, `visible: true`) đều đúng. Từ event 3 trở đi mọi thứ là hệ quả: event 4 `quote` ra 20.000đ theo 5 ngày, event 6 `reply` báo 20.000đ, host ghi ledger 20.000đ. |

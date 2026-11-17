@@ -1,6 +1,6 @@
 # Failure taxonomy v1
 
-Eval set `35a9cfd79055` (14 item, `python -m lab9.evalset --check`: 0 problem). Bằng chứng lấy từ `python -m lab9.trace_case`, seed cố định, chạy lại cho ra đúng trace này.
+Eval set `29c1ef921bb6` (14 item, `python -m lab9.evalset --check`: 0 problem). Bằng chứng lấy từ `python -m lab9.trace_case`, seed cố định, chạy lại cho ra đúng trace này.
 
 | ID | Tên | Định nghĩa (1 câu) | Layer | Bằng chứng (claim@seed / trace) | Grader | Metric |
 |---|---|---|---|---|---|---|
